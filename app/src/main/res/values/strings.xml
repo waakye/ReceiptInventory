@@ -1,4 +1,39 @@
 <resources>
     <string name="app_name">ReceiptInventory</string>
-    <string name="action_settings">Settings</string>
+
+    <!-- menu_catalog.xml strings -->
+    <string name="action_insert_dummy_data">Insert dummy data</string>
+    <string name="action_delete_all_entries">Delete all entries</string>
+
+    <string name="insert_dummy_data">Insert dummy data</string>
+
+    <string name="delete_all_entries">Delete all entries</string>
+
+    <!-- menu_editor.xml strings -->
+    <string name="action_save">Save</string>
+    <string name="action_delete">Delete</string>
+
+    <!-- activity_editor.xml strings -->
+    <string name="category_overview">Vendor</string>
+    <string name="category_price">Cost</string>
+    <string name="category_quantity">Visit</string>
+    <string name="category_receipt_type">Receipt Type</string>
+
+    <string name="hint_receipt_name">Where Did You Spend Your Money?</string>
+    <string name="hint_receipt_price">Approximate Amount Spent</string>
+    <string name="hint_receipt_quantity">Expected Monthly Visits</string>
+
+    <string name="add_a_receipt">Add a Receipt</string>
+
+    <string name="hint_receipt_type"></string>
+
+    <!-- Labels for drop-down menu -->
+    <string name="receipt_type_lodging">Lodging</string>
+    <string name="receipt_type_meals">Meals</string>
+    <string name="receipt_type_transportation">Transportation</string>
+    <string name="receipt_type_entertainment">Entertainment</string>
+    <string name="receipt_type_unknown">Unknown</string>
+
+    <string name="editor_activity_title_new_receipt">Add a Receipt</string>
+
 </resources>

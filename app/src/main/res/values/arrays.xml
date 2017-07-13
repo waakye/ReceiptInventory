@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- These are the options displayed in the receipt type drop-down Spinner -->
+    <string-array name="array_receipt_type_options">
+        <item>@string/receipt_type_lodging</item>
+        <item>@string/receipt_type_meals</item>
+        <item>@string/receipt_type_transportation</item>
+        <item>@string/receipt_type_entertainment</item>
+        <item>@string/receipt_type_unknown</item>
+    </string-array>
+
+</resources>
