@@ -12,6 +12,8 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 
+import com.waakye.android.receiptinventory.data.ReceiptContract;
+
 /**
  * Created by lesterlie on 7/12/17.
  * Allows the user to create a new receipt or edit an existing one.
@@ -34,8 +36,12 @@ public class EditorActivity extends AppCompatActivity {
     /**
      * Type of the receipt.  The possible values are:
      * 0 for Unknown, 1 for Lodging, 2 for Meals, 3 for Transportation, 4 for Entertainment
+     * Type of the receipt. The possible values are in the ReceiptContract.java file:
+     * {@link ReceiptEntry#RECEIPT_UNKNOWN}, {@link ReceiptEntry#RECEIPT_LODGING},
+     * {@link ReceiptEntry#RECEIPT_MEALS}, {@link ReceiptEntry#RECEIPT_TRANSPORTATION},
+     * {@link ReceiptEntry#RECEIPT_ENTERTAINMENT}.
      */
-    private int mReceiptType = 0;
+    private int mReceiptType = ReceiptContract.ReceiptEntry.RECEIPT_UNKNOWN;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -74,15 +80,15 @@ public class EditorActivity extends AppCompatActivity {
                 String selection = (String)parent.getItemAtPosition(position);
                 if(!TextUtils.isEmpty(selection)){
                     if(selection.equals(getString(R.string.receipt_type_unknown))){
-                        mReceiptType = 0; // Unknown
+                        mReceiptType = ReceiptContract.ReceiptEntry.RECEIPT_UNKNOWN;
                     } else if (selection.equals(getString(R.string.receipt_type_lodging))){
-                        mReceiptType = 1; // Lodging
+                        mReceiptType = ReceiptContract.ReceiptEntry.RECEIPT_LODGING;
                     } else if (selection.equals(getString(R.string.receipt_type_meals))){
-                        mReceiptType = 2; // Meals
+                        mReceiptType = ReceiptContract.ReceiptEntry.RECEIPT_MEALS;
                     } else if (selection.equals(getString(R.string.receipt_type_transportation))){
-                        mReceiptType = 3; // Transportation
+                        mReceiptType = ReceiptContract.ReceiptEntry.RECEIPT_TRANSPORTATION;
                     } else if (selection.equals(getString(R.string.receipt_type_entertainment))){
-                        mReceiptType = 4; // Entertainment
+                        mReceiptType = ReceiptContract.ReceiptEntry.RECEIPT_ENTERTAINMENT;
                     }
                 }
             }
@@ -90,7 +96,7 @@ public class EditorActivity extends AppCompatActivity {
             // Because AdapterView is an abstract class, onNothingSelected must be defined
             @Override
             public void onNothingSelected(AdapterView<?> parent){
-                mReceiptType = 0; // Unknown
+                mReceiptType = ReceiptContract.ReceiptEntry.RECEIPT_UNKNOWN;
             }
         });
     }
