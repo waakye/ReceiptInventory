@@ -73,11 +73,52 @@ public class CatalogActivity extends AppCompatActivity {
                 null                                        // The sort order
         );
 
+        TextView displayView = (TextView)findViewById(R.id.text_view_receipt);
+
         try {
-            // Display the number of rows in the Cursor (which reflects the number of rows in the
-            // receipts table in the database).
-            TextView displayView = (TextView)findViewById(R.id.text_view_receipt);
-            displayView.setText("Number of rows in the receipts database table: " + cursor.getCount());
+            // Create a header in the Text View that looks like this:
+            //
+            // The receipts table contains <number of rows in Cursor> receipts
+            // _id - name - price - quantity - type - image_uri
+            //
+            // In the while loop below, iterate through the rows of the cursor and display the
+            // information from each column in this order
+            displayView.setText("The receipts table contains " + cursor.getCount()
+                    + " receipts.\n\n");
+            displayView.append(ReceiptContract.ReceiptEntry._ID + " - "
+                + ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_NAME + " - "
+                + ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_PRICE + " - "
+                + ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_QUANTITY + " - "
+                + ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_TYPE + " - "
+                + ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_IMAGE_URI + "\n");
+
+            // Figure out the index of each column
+            int idColumnIndex = cursor.getColumnIndex(ReceiptContract.ReceiptEntry._ID);
+            int nameColumnIndex = cursor.getColumnIndex(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_NAME);
+            int priceColumnIndex = cursor.getColumnIndex(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_PRICE);
+            int quantityColumnIndex = cursor.getColumnIndex(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_QUANTITY);
+            int typeColumnIndex = cursor.getColumnIndex(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_TYPE);
+            int imageUriColumnIndex = cursor.getColumnIndex(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_IMAGE_URI);
+
+            // Iterate through all the returned rows in the cursor
+            while (cursor.moveToNext()){
+                // Use that index to extract the String or Int value of the word
+                // at the current row the cursor is on.
+                int currentID = cursor.getInt(idColumnIndex);
+                String currentName = cursor.getString(nameColumnIndex);
+                int currentPrice = cursor.getInt(priceColumnIndex);
+                int currentQuantity = cursor.getInt(quantityColumnIndex);
+                int currentType = cursor.getInt(typeColumnIndex);
+                String currentImageUri = cursor.getString(imageUriColumnIndex);
+                // Display the values from each column of the current row in the TextView
+                displayView.append("\n" + currentID + " - "
+                    + currentName + " - "
+                    + currentPrice + " - "
+                    + currentQuantity + " - "
+                    + currentType + " - "
+                    + currentImageUri);
+            }
+
         } finally {
             // Always close the cursor when you're done reading from it.  This releases all its
             // resources and makes it invalid.
@@ -85,7 +126,7 @@ public class CatalogActivity extends AppCompatActivity {
         }
     }
 
-    // TODO: Define a projection and query to search for the quantity of a specific receipt 
+    // TODO: Define a projection and query to search for the quantity of a specific receipt
 
     /**
      * Helper method to insert hardcoded receipt data into the database.  For debugging purposes only.
