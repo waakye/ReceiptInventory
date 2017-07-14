@@ -1,22 +1,36 @@
 package com.waakye.android.receiptinventory;
 
+import android.app.Activity;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.waakye.android.receiptinventory.data.ReceiptContract;
 import com.waakye.android.receiptinventory.data.ReceiptDbHelper;
+
+import java.io.FileDescriptor;
+import java.io.IOException;
 
 /**
  * Created by lesterlie on 7/12/17.
@@ -24,6 +38,8 @@ import com.waakye.android.receiptinventory.data.ReceiptDbHelper;
  */
 
 public class EditorActivity extends AppCompatActivity {
+
+    public static final String LOG_TAG = EditorActivity.class.getSimpleName();
 
     /** EditText field to enter the receipt's name */
     private EditText mNameEditText;
@@ -44,6 +60,23 @@ public class EditorActivity extends AppCompatActivity {
      */
     private int mReceiptType = ReceiptContract.ReceiptEntry.RECEIPT_UNKNOWN;
 
+    /** Variables and constants related to image picker */
+    private static final int PICK_IMAGE_REQUEST = 0;
+//    private static final int SEND_MAIL_REQUEST = 1;
+
+    private static final int REQUEST_IMAGE_CAPTURE = 1;
+
+    private boolean isGalleryPicture = false;
+
+    private static final String STATE_URI = "STATE_URI";
+
+    private ImageView mImageView;
+    private TextView mTextView;
+    private Button imageButton;
+
+    private Uri mUri;
+    private Bitmap mBitmap;
+
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -57,6 +90,16 @@ public class EditorActivity extends AppCompatActivity {
 
         setupSpinner();
 
+        mTextView = (TextView) findViewById(R.id.image_uri);
+        mImageView = (ImageView) findViewById(R.id.image);
+
+        imageButton = (Button)findViewById(R.id.add_image_button);
+        imageButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                openImageSelector();
+            }
+        });
     }
 
     /**
@@ -173,4 +216,85 @@ public class EditorActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+
+    public void openImageSelector() {
+        Log.e(LOG_TAG, "openImageSelector() called ...");
+        Intent intent;
+
+        if (Build.VERSION.SDK_INT < 19) {
+            intent = new Intent(Intent.ACTION_GET_CONTENT);
+        } else {
+            intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+        }
+
+        intent.setType("image/*");
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+    }
+
+    /**
+     * After the user selects a document in the picker, onActivityResult() gets called.
+     * The resultData parameter contains the URI that points to the selected document.
+     * Extract the URI using getData().  When you have it, you can use it to retrieve the document
+     * the user wants
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+        Log.i(LOG_TAG, "Received an \"Activity Result\"");
+        // The ACTION_OPEN_DOCUMENT intent was sent with the request code READ_REQUEST_CODE.
+        // If the request code seen here doesn't match, it's the response to some other intent,
+        // and the below code shouldn't run at all.
+
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK) {
+            // The document selected by the user won't be returned in the intent.
+            // Instead, a URI to that document will be contained in the return intent
+            // provided to this method as a parameter.  Pull that uri using "resultData.getData()"
+
+            if (resultData != null) {
+                mUri = resultData.getData();
+                Log.i(LOG_TAG, "Uri: " + mUri.toString());
+
+                mTextView.setText(mUri.toString());
+                mBitmap = getBitmapFromUri(mUri);
+                mImageView.setImageBitmap(mBitmap);
+
+                isGalleryPicture = true;
+            }
+        } else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
+            Log.i(LOG_TAG, "Uri: " + mUri.toString());
+
+            mTextView.setText(mUri.toString());
+            mBitmap = getBitmapFromUri(mUri);
+            mImageView.setImageBitmap(mBitmap);
+
+            isGalleryPicture = false;
+        }
+    }
+
+    private Bitmap getBitmapFromUri(Uri uri) {
+        Log.e(LOG_TAG, "getBitmapFromUri() method called ... ");
+        ParcelFileDescriptor parcelFileDescriptor = null;
+        try {
+            parcelFileDescriptor =
+                    getContentResolver().openFileDescriptor(uri, "r");
+            FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+            Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
+            parcelFileDescriptor.close();
+            return image;
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Failed to load image.", e);
+            return null;
+        } finally {
+            try {
+                if (parcelFileDescriptor != null) {
+                    parcelFileDescriptor.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.e(LOG_TAG, "Error closing ParcelFile Descriptor");
+            }
+        }
+    }
+
 }

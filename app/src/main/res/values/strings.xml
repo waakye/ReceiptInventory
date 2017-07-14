@@ -12,12 +12,14 @@
     <!-- menu_editor.xml strings -->
     <string name="action_save">Save</string>
     <string name="action_delete">Delete</string>
+    <string name="action_sendmail">Send Mail</string>
 
     <!-- activity_editor.xml strings -->
     <string name="category_overview">Vendor</string>
     <string name="category_price">Cost</string>
     <string name="category_quantity">Visit</string>
     <string name="category_receipt_type">Receipt Type</string>
+    <string name="category_image">Image</string>
 
     <string name="hint_receipt_name">Where Did You Spend Your Money?</string>
     <string name="hint_receipt_price">Approximate Amount Spent</string>
@@ -37,5 +39,10 @@
     <string name="editor_activity_title_new_receipt">Add a Receipt</string>
 
     <string name="sale_button">Sale</string>
+
+    <string name="add_image_button">Add Image</string>
+
+    <string name="image_preview">Image Preview Here</string>
+
 
 </resources>
