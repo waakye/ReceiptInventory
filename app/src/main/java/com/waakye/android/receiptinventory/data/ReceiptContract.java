@@ -100,5 +100,19 @@ public final class ReceiptContract {
         public static final int RECEIPT_MEALS = 2;
         public static final int RECEIPT_TRANSPORTATION = 3;
         public static final int RECEIPT_ENTERTAINMENT = 4;
+
+        /**
+         * Returns whether or not the given type is {@link #RECEIPT_UNKNOWN},
+         * {@link #RECEIPT_LODGING}, {@link #RECEIPT_MEALS}, {@link #RECEIPT_TRANSPORTATION},
+         * {@link #RECEIPT_ENTERTAINMENT}
+         */
+        public static boolean isValidType(int receiptType){
+            if(receiptType == RECEIPT_UNKNOWN || receiptType == RECEIPT_LODGING ||
+                    receiptType == RECEIPT_MEALS || receiptType == RECEIPT_TRANSPORTATION ||
+                    receiptType == RECEIPT_ENTERTAINMENT) {
+                return true;
+            }
+            return false;
+        }
     }
 }

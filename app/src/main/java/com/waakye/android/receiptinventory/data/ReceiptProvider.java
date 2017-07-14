@@ -7,12 +7,16 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.util.Log;
 
 /**
  * Created by lesterlie on 7/14/17.
  */
 
 public class ReceiptProvider extends ContentProvider {
+
+    /** Tag for the log messages */
+    public static final String LOG_TAG = ReceiptProvider.class.getSimpleName();
 
     /** URI matcher code for the content URI for the receipts table */
     private static final int RECEIPTS = 100;
@@ -108,8 +112,61 @@ public class ReceiptProvider extends ContentProvider {
     }
 
     @Override
-    public Uri insert(Uri uri, ContentValues values) {
-        return null;
+    public Uri insert(Uri uri, ContentValues contentValues) {
+        final int match = sUriMatcher.match(uri);
+        switch (match){
+            case RECEIPTS:
+                return insertReceipt(uri, contentValues);
+            default:
+                throw new IllegalArgumentException("Insertion is not supported for " + uri);
+        }
+    }
+
+    /**
+     * Insert a receipt into the database with the given content values.  Return the new content URI
+     * for that specific row in the database.
+     */
+    private Uri insertReceipt(Uri uri, ContentValues values) {
+        // Check that the name is not null
+        String name = values.getAsString(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_NAME);
+        if(name == null){
+            throw new IllegalArgumentException("Receipt requires a name");
+        }
+
+
+        // If the price is provided, check that it's greater than or equal to $0
+        Integer price = values.getAsInteger(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_PRICE);
+        if(price != null && price <0){
+            throw new IllegalArgumentException("Receipt requires a valid price.");
+        }
+
+        // If the quantity is provided, check that it's greater than or equal to 0
+        Integer quantity = values.getAsInteger(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_QUANTITY);
+        if(quantity != null && quantity < 0){
+            throw new IllegalArgumentException("Receipt requires a valid quantity.");
+        }
+
+        // Check that the type is valid
+        Integer receiptType = values.getAsInteger(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_TYPE);
+        if(receiptType == null || !ReceiptContract.ReceiptEntry.isValidType(receiptType)){
+            throw new IllegalArgumentException("Receipt requires valid type.");
+        }
+
+        // No need to check image_uri because receipt not required to have one
+
+        // Get writeable database
+        SQLiteDatabase database = mDbHelper.getWritableDatabase();
+
+        // Insert the new receipt with the given values
+        long id = database.insert(ReceiptContract.ReceiptEntry.TABLE_NAME, null, values);
+        // If the ID is -1, then the insertion failed. Log an error and return null.
+        if (id == -1){
+            Log.e(LOG_TAG, "Failed to insert row for " + uri);
+            return null;
+        }
+
+        // Return the new URI with the ID (of the newly inserted row) appended at the end
+        return ContentUris.withAppendedId(uri, id);
     }
 
     @Override

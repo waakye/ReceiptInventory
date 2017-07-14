@@ -3,7 +3,7 @@ package com.waakye.android.receiptinventory;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -13,12 +13,8 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.waakye.android.receiptinventory.data.ReceiptContract;
-import com.waakye.android.receiptinventory.data.ReceiptDbHelper;
 
 public class CatalogActivity extends AppCompatActivity {
-
-    /** Database helper that will provide us access to the database */
-    private ReceiptDbHelper mDbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,12 +29,8 @@ public class CatalogActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
-        // To access our database, we instantiate our sublcass of SQLiteOpenHelper and pass the
-        // context, which is the current activity.
-        mDbHelper = new ReceiptDbHelper(this);
-
     }
+
     @Override
     protected void onStart(){
         super.onStart();
@@ -127,10 +119,7 @@ public class CatalogActivity extends AppCompatActivity {
     /**
      * Helper method to insert hardcoded receipt data into the database.  For debugging purposes only.
      */
-    private void insertReceipt(){
-        // Gets the database in write mode.
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
-
+    private void insertReceipt() {
         // Create a ContentValues object where column names are the keys, and Roberto's receipt
         // attributes are the values
         ContentValues values = new ContentValues();
@@ -141,13 +130,11 @@ public class CatalogActivity extends AppCompatActivity {
                 ReceiptContract.ReceiptEntry.RECEIPT_MEALS);
         values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_IMAGE_URI, "content://");
 
-        // Insert a new row for Roberto's in the database, returning the ID of that new row.
-        // The first argument for db.insert() is the receipts table name.
-        // The second argument provides the name of a column in which the framework can insert NULL
-        // in the event that the ContentValues is empty (if this is set to "null", then the
-        // framework will not insert a row when there are no values).
-        // The third argument is the ContentValues object containing the info for Roberto's
-        long newRowId = db.insert(ReceiptContract.ReceiptEntry.TABLE_NAME, null, values);
+        // Insert a new row for Roberto's into the provider using the ContentResolver.
+        // Use the {@link ReceiptEntry#CONTENT_URI} to indicate we want to insert into the
+        // receipts database table.
+        // Receive the new content URI that will allow us to access Roberto's data in the future
+        Uri newUri = getContentResolver().insert(ReceiptContract.ReceiptEntry.CONTENT_URI, values);
     }
 
     @Override

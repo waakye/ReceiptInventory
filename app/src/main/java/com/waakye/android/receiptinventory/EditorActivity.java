@@ -3,7 +3,6 @@ package com.waakye.android.receiptinventory;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -27,7 +26,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.waakye.android.receiptinventory.data.ReceiptContract;
-import com.waakye.android.receiptinventory.data.ReceiptDbHelper;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -158,12 +156,6 @@ public class EditorActivity extends AppCompatActivity {
         int price = Integer.parseInt(priceString);
         int quantity = Integer.parseInt(quantityString);
 
-        // Create database helper
-        ReceiptDbHelper mDbHelper = new ReceiptDbHelper(this);
-
-        // Gets the database in write mode
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
-
         // Create a ContentValues object where column names are keys and receipt attributes from
         // the editor are the values.
         ContentValues values = new ContentValues();
@@ -173,16 +165,18 @@ public class EditorActivity extends AppCompatActivity {
         values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_TYPE, mReceiptType);
         values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_IMAGE_URI, "content://");
 
-        // Insert a new row for receipt in the database, returning the ID of that new row
-        long newRowId = db.insert(ReceiptContract.ReceiptEntry.TABLE_NAME, null, values);
+        // Insert a new receipt into the provider, returning the content URI for the new receipt
+        Uri newUri = getContentResolver().insert(ReceiptContract.ReceiptEntry.CONTENT_URI, values);
 
         // Show a toast message depending on whether or not the insertion was successful
-        if(newRowId == -1){
-            // If the row ID is -1, then there was an error with insertion
-            Toast.makeText(this, "Error with saving receipt", Toast.LENGTH_SHORT).show();
+        if (newUri == null){
+            // If the new content URI is null, then there was an error with insertion.
+            Toast.makeText(this, getString(R.string.editor_insert_receipt_failed),
+                    Toast.LENGTH_SHORT).show();
         } else {
-            // Otherwise, the insertion was successful and we can display a toast with the row ID
-            Toast.makeText(this, "Receipt saved with row ID: " + newRowId, Toast.LENGTH_SHORT).show();
+            // Otherwise, the insertion was successful and we can display a toast.
+            Toast.makeText(this, getString(R.string.editor_insert_receipt_successful),
+                    Toast.LENGTH_SHORT).show();
         }
     }
 

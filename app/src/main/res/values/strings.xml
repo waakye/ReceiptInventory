@@ -44,5 +44,10 @@
 
     <string name="image_preview">Image Preview Here</string>
 
+    <!-- Toast message in editor when new receipt has been successfully inserted [CHAR LIMIT=NONE] -->
+    <string name="editor_insert_receipt_successful">Receipt saved</string>
+
+    <!-- Toast message in editor when new receipt has been successfully inserted [CHAR LIMIT=NONE] -->
+    <string name="editor_insert_receipt_failed">Error with saving receipt</string>
 
 </resources>
