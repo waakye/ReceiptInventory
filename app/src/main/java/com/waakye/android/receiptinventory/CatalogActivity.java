@@ -53,10 +53,25 @@ public class CatalogActivity extends AppCompatActivity {
         // Create and/or open a database to read from it.
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
-        // Perform this raw SQL query "SELECT * FROM receipts" to get a Cursor that contains all
-        // rows from the receipts table.
-        Cursor cursor = db.rawQuery("SELECT * FROM " +
-                ReceiptContract.ReceiptEntry.TABLE_NAME, null);
+        // Define a projection that specifies which columns from the database you will actually use
+        // after the query.
+        String[] projectionAllColumns = {
+                ReceiptContract.ReceiptEntry._ID,
+                ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_NAME,
+                ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_PRICE,
+                ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_QUANTITY,
+                ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_TYPE,
+                ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_IMAGE_URI};
+
+        Cursor cursor = db.query(
+                ReceiptContract.ReceiptEntry.TABLE_NAME,    // The table to query
+                projectionAllColumns,                       // The columns to return
+                null,                                       // The columns for the WHERE clause
+                null,                                       // The values for the WHERE clause
+                null,                                       // Don't group the rows
+                null,                                       // Don't filter by row groups
+                null                                        // The sort order
+        );
 
         try {
             // Display the number of rows in the Cursor (which reflects the number of rows in the
@@ -69,6 +84,8 @@ public class CatalogActivity extends AppCompatActivity {
             cursor.close();
         }
     }
+
+    // TODO: Define a projection and query to search for the quantity of a specific receipt 
 
     /**
      * Helper method to insert hardcoded receipt data into the database.  For debugging purposes only.
