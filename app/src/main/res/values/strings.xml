@@ -36,4 +36,6 @@
 
     <string name="editor_activity_title_new_receipt">Add a Receipt</string>
 
+    <string name="sale_button">Sale</string>
+
 </resources>
