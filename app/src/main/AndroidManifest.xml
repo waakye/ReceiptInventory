@@ -29,6 +29,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CatalogActivity"/>
         </activity>
+        <provider
+            android:authorities="com.waakye.android.receiptinventory"
+            android:name=".data.ReceiptProvider"
+            android:exported="false"/>
     </application>
 
 </manifest>
