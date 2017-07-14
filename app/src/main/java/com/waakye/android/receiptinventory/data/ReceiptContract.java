@@ -30,6 +30,13 @@ public final class ReceiptContract {
         public final static String _ID = BaseColumns._ID;
 
         /**
+         * Name of the vendor for the receipt
+         *
+         * Type: TEXT
+         */
+        public final static String COLUMN_RECEIPT_NAME = "name";
+
+        /**
          * Cost (or price) of the receipt.
          *
          * Type: INTEGER
@@ -52,6 +59,13 @@ public final class ReceiptContract {
          * Type: INTEGER
          */
         public final static String COLUMN_RECEIPT_TYPE = "receipt_type";
+
+        /**
+         * Image uri for the receipt
+         *
+         * Type: TEXT
+         */
+        public final static String COLUMN_RECEIPT_IMAGE_URI = "image_uri";
 
         /**
          * Possible values for the type of the receipt
