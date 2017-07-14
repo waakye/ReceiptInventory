@@ -1,5 +1,7 @@
 package com.waakye.android.receiptinventory;
 
+import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -11,8 +13,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.waakye.android.receiptinventory.data.ReceiptContract;
+import com.waakye.android.receiptinventory.data.ReceiptDbHelper;
 
 /**
  * Created by lesterlie on 7/12/17.
@@ -36,10 +40,7 @@ public class EditorActivity extends AppCompatActivity {
     /**
      * Type of the receipt.  The possible values are:
      * 0 for Unknown, 1 for Lodging, 2 for Meals, 3 for Transportation, 4 for Entertainment
-     * Type of the receipt. The possible values are in the ReceiptContract.java file:
-     * {@link ReceiptEntry#RECEIPT_UNKNOWN}, {@link ReceiptEntry#RECEIPT_LODGING},
-     * {@link ReceiptEntry#RECEIPT_MEALS}, {@link ReceiptEntry#RECEIPT_TRANSPORTATION},
-     * {@link ReceiptEntry#RECEIPT_ENTERTAINMENT}.
+     * Type of the receipt. The possible values are in the ReceiptContract.java file
      */
     private int mReceiptType = ReceiptContract.ReceiptEntry.RECEIPT_UNKNOWN;
 
@@ -101,6 +102,47 @@ public class EditorActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Get user input from editor and save new receipt into database.
+     */
+    private void insertReceipt(){
+        // Read from input fields
+        // Use trim to eliminate leading or trailing white space
+        String nameString = mNameEditText.getText().toString().trim();
+        String priceString = mPriceEditText.getText().toString().trim();
+        String quantityString = mQuantityEditText.getText().toString().trim();
+
+        int price = Integer.parseInt(priceString);
+        int quantity = Integer.parseInt(quantityString);
+
+        // Create database helper
+        ReceiptDbHelper mDbHelper = new ReceiptDbHelper(this);
+
+        // Gets the database in write mode
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+        // Create a ContentValues object where column names are keys and receipt attributes from
+        // the editor are the values.
+        ContentValues values = new ContentValues();
+        values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_NAME, nameString);
+        values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_PRICE, price);
+        values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_QUANTITY, quantity);
+        values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_TYPE, mReceiptType);
+        values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_IMAGE_URI, "content://");
+
+        // Insert a new row for receipt in the database, returning the ID of that new row
+        long newRowId = db.insert(ReceiptContract.ReceiptEntry.TABLE_NAME, null, values);
+
+        // Show a toast message depending on whether or not the insertion was successful
+        if(newRowId == -1){
+            // If the row ID is -1, then there was an error with insertion
+            Toast.makeText(this, "Error with saving receipt", Toast.LENGTH_SHORT).show();
+        } else {
+            // Otherwise, the insertion was successful and we can display a toast with the row ID
+            Toast.makeText(this, "Receipt saved with row ID: " + newRowId, Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
         // Inflate the menu options from the res/menu/menu_editor.xml file.
@@ -115,7 +157,10 @@ public class EditorActivity extends AppCompatActivity {
         switch(item.getItemId()) {
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
-                // Do nothing for now
+                // Save receipt to database
+                insertReceipt();
+                // Exit activity
+                finish();
                 return true;
             case R.id.action_delete:
                 // Do nothing for now

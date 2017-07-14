@@ -38,6 +38,10 @@ public class CatalogActivity extends AppCompatActivity {
         // context, which is the current activity.
         mDbHelper = new ReceiptDbHelper(this);
 
+    }
+    @Override
+    protected void onStart(){
+        super.onStart();
         displayDatabaseInfo();
     }
 
