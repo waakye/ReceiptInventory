@@ -50,9 +50,6 @@ public class CatalogActivity extends AppCompatActivity {
      * the receipts database.
      */
     private void displayDatabaseInfo(){
-        // Create and/or open a database to read from it.
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
-
         // Define a projection that specifies which columns from the database you will actually use
         // after the query.
         String[] projectionAllColumns = {
@@ -63,15 +60,14 @@ public class CatalogActivity extends AppCompatActivity {
                 ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_TYPE,
                 ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_IMAGE_URI};
 
-        Cursor cursor = db.query(
-                ReceiptContract.ReceiptEntry.TABLE_NAME,    // The table to query
-                projectionAllColumns,                       // The columns to return
-                null,                                       // The columns for the WHERE clause
-                null,                                       // The values for the WHERE clause
-                null,                                       // Don't group the rows
-                null,                                       // Don't filter by row groups
-                null                                        // The sort order
-        );
+        // Perform a query on the provider using the ContentResolver.
+        // Use the {@link ReceiptEntry#CONTENT_URI} to access the receipt data
+        Cursor cursor = getContentResolver().query(
+                ReceiptContract.ReceiptEntry.CONTENT_URI,   // The content URI of the words table
+                projectionAllColumns,                       // The columns to return for each row
+                null,                                       // Selection criteria
+                null,                                       // Selection criteria
+                null);                                      // The sort order for the returned rows
 
         TextView displayView = (TextView)findViewById(R.id.text_view_receipt);
 
