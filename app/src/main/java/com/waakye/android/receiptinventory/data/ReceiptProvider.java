@@ -170,11 +170,6 @@ public class ReceiptProvider extends ContentProvider {
     }
 
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
-        return 0;
-    }
-
-    @Override
     public int update(Uri uri, ContentValues contentValues, String selection, String[] selectionArgs) {
 
         final int match = sUriMatcher.match(uri);
@@ -250,6 +245,29 @@ public class ReceiptProvider extends ContentProvider {
         return database.update(ReceiptContract.ReceiptEntry.TABLE_NAME, values, selection,
                 selectionArgs);
     }
+
+    @Override
+    public int delete(Uri uri, String selection, String[] selectionArgs) {
+
+        // Get writeable database
+        SQLiteDatabase database = mDbHelper.getWritableDatabase();
+
+        final int match = sUriMatcher.match(uri);
+        switch(match) {
+            case RECEIPTS:
+                // Delete all rows that match the selection and selection args
+                return database.delete(ReceiptContract.ReceiptEntry.TABLE_NAME, selection, selectionArgs);
+            case RECEIPT_ID:
+                // Delete a single row given by the ID in the URI
+                selection = ReceiptContract.ReceiptEntry._ID + "=?";
+                selectionArgs = new String[] {String.valueOf(ContentUris.parseId(uri))};
+                return database.delete(ReceiptContract.ReceiptEntry.TABLE_NAME, selection, selectionArgs);
+            default:
+                throw new IllegalArgumentException("Deletion is not supported for " + uri);
+        }
+
+    }
+
 
 
 }
