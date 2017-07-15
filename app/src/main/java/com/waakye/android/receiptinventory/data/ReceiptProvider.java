@@ -107,11 +107,6 @@ public class ReceiptProvider extends ContentProvider {
     }
 
     @Override
-    public String getType(Uri uri) {
-        return null;
-    }
-
-    @Override
     public Uri insert(Uri uri, ContentValues contentValues) {
         final int match = sUriMatcher.match(uri);
         switch (match){
@@ -244,6 +239,19 @@ public class ReceiptProvider extends ContentProvider {
         // Returns the number of database rows affected by the update statement
         return database.update(ReceiptContract.ReceiptEntry.TABLE_NAME, values, selection,
                 selectionArgs);
+    }
+
+    @Override
+    public String getType(Uri uri){
+        final int match = sUriMatcher.match(uri);
+        switch (match){
+            case RECEIPTS:
+                return ReceiptContract.ReceiptEntry.CONTENT_LIST_TYPE;
+            case RECEIPT_ID:
+                return ReceiptContract.ReceiptEntry.CONTENT_ITEM_TYPE;
+            default:
+                throw new IllegalArgumentException("Unknown URI " + uri + " with match " + match);
+        }
     }
 
     @Override
