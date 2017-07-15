@@ -8,11 +8,10 @@
     android:orientation="vertical"
     tools:context="com.waakye.android.receiptinventory.CatalogActivity">
 
-    <TextView
-        android:id="@+id/text_view_receipt"
-        android:padding="@dimen/activity_margin"
+    <ListView
+        android:id="@+id/list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_margin="@dimen/activity_margin"/>
 
     <android.support.design.widget.FloatingActionButton
