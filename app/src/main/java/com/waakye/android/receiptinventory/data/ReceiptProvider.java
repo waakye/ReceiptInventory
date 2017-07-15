@@ -175,8 +175,80 @@ public class ReceiptProvider extends ContentProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        return 0;
+    public int update(Uri uri, ContentValues contentValues, String selection, String[] selectionArgs) {
+
+        final int match = sUriMatcher.match(uri);
+        switch(match) {
+            case RECEIPTS:
+                return updateReceipt(uri, contentValues, selection, selectionArgs);
+            case RECEIPT_ID:
+                // For the RECEIPT_ID code, extract out the ID from the URI, so we know which row
+                // to update.  Selection will be "_id=?" and selection arguments will be a String
+                // array containing the actual ID.
+                selection = ReceiptContract.ReceiptEntry._ID + "=?";
+                selectionArgs = new String[] {String.valueOf(ContentUris.parseId(uri))};
+                return updateReceipt(uri, contentValues, selection, selectionArgs);
+            default:
+                throw new IllegalArgumentException("Update is not supported for " + uri);
+        }
+    }
+
+    /**
+     * Update receipts in database with the given content values.  Apply the changes to the rows
+     * specified in the selection and selection arguments (which could be 0 or 1 or more receipts).
+     * Return the number of rows that were successfully updated
+     */
+    private int updateReceipt(Uri uri, ContentValues values, String selection,
+                              String[] selectionArgs){
+        // If the {@link ReceiptEntry#COLUMN_RECEIPT_NAME} key is present, check that the name value
+        // is not null
+        if (values.containsKey(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_NAME)){
+            String name = values.getAsString(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_NAME);
+            if (name == null){
+                throw new IllegalArgumentException("Receipt requires a name.");
+            }
+        }
+
+        // If the {@link ReceiptEntry#COLUMN_RECEIPT_PRICE} key is present, check that the price
+        // values is not null
+        if (values.containsKey(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_PRICE)){
+            Integer price = values.getAsInteger(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_PRICE);
+            if(price != null && price < 0){
+                throw new IllegalArgumentException("Receipt requires a price.");
+            }
+        }
+
+        // If the {@link ReceiptEntry#COLUMN_RECEIPT_QUANTITY} key is present, check that the
+        // quantity values is not null
+        if (values.containsKey(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_QUANTITY)){
+            Integer quantity = values.getAsInteger(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_QUANTITY);
+            if(quantity != null && quantity < 0){
+                throw new IllegalArgumentException("Receipt requires a quantity.");
+            }
+        }
+
+        // If the {@link ReceiptEntry#COLUMN_RECEIPT_TYPE} key is present, check that the type
+        // is valid.
+        if(values.containsKey(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_TYPE)){
+            Integer receiptType = values.getAsInteger(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_TYPE);
+            if (receiptType == null || !ReceiptContract.ReceiptEntry.isValidType(receiptType)){
+                throw new IllegalArgumentException("Receipt requires a type");
+            }
+        }
+
+        // No need to check the image_uri, any value is valid (including null).
+
+        // If there are no values to update, then don't try to update the database
+        if(values.size() == 0){
+            return 0;
+        }
+
+        // Otherwise, get writeable database to update the data
+        SQLiteDatabase database = mDbHelper.getWritableDatabase();
+
+        // Returns the number of database rows affected by the update statement
+        return database.update(ReceiptContract.ReceiptEntry.TABLE_NAME, values, selection,
+                selectionArgs);
     }
 
 
