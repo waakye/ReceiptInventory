@@ -30,6 +30,9 @@
 
     <string name="add_a_receipt">Add a Receipt</string>
 
+    <!-- Title for the activity to edit an existing receipt [CHAR LIMIT=20] -->
+    <string name="editor_activity_title_edit_receipt">Edit Receipt</string>
+
     <string name="hint_receipt_type"></string>
 
     <!-- Labels for drop-down menu -->

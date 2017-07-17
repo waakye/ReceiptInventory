@@ -80,6 +80,21 @@ public class EditorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
 
+        // Examine the intent that was used to launch this activity, in order to figure out if
+        // we're creating a new receipt or editing an existing one.
+        Intent intent = getIntent();
+        Uri currentReceiptUri = intent.getData();
+
+        // If the intent DOES NOT contain a receipt content URI, then we know that we are creating
+        // a new receipt
+        if(currentReceiptUri == null){
+            // This is a new receipt, so change the app bar to say "Add a Receipt"
+            setTitle(getString(R.string.editor_activity_title_new_receipt));
+        } else {
+            // Otherwise, this an existing receipt, so change app bar to say "Edit Receipt"
+            setTitle(getString(R.string.editor_activity_title_edit_receipt));
+        }
+
         // Find all the relevant views that we need to read user input from
         mNameEditText = (EditText)findViewById(R.id.edit_receipt_name);
         mPriceEditText = (EditText)findViewById(R.id.edit_receipt_price);
