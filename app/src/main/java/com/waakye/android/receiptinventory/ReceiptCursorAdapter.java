@@ -54,6 +54,9 @@ public class ReceiptCursorAdapter extends CursorAdapter {
      * @param context   app context
      * @param cursor    The cursor from which to get the data.  The cursor is already moved to the
      *                  correct row.
+     *
+     *                  Seems that the bindView items (name, price, quantity) must match the
+     *                  projection from the CursorLoader in the CatalogActivity
      */
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
@@ -62,29 +65,29 @@ public class ReceiptCursorAdapter extends CursorAdapter {
         TextView nameTextView = (TextView)view.findViewById(R.id.receipt_name);
         TextView priceTextView = (TextView)view.findViewById(R.id.receipt_price);
         TextView quantityTextView = (TextView)view.findViewById(R.id.receipt_quantity);
-        TextView receiptTypeTextView = (TextView) view.findViewById(R.id.receipt_type);
-        TextView imageUriTextView = (TextView)view.findViewById(R.id.receipt_image_uri);
+//        TextView receiptTypeTextView = (TextView) view.findViewById(R.id.receipt_type);
+//        TextView imageUriTextView = (TextView)view.findViewById(R.id.receipt_image_uri);
 
         // Find the columns of receipt attributes that we're interested in
         int nameColumnIndex = cursor.getColumnIndex(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_NAME);
         int priceColumnIndex = cursor.getColumnIndex(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_PRICE);
         int quantityColumnIndex = cursor.getColumnIndex(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_QUANTITY);
-        int receiptTypeColumnIndex = cursor.getColumnIndex(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_TYPE);
-        int imageUriColumnIndex = cursor.getColumnIndex(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_IMAGE_URI);
+//        int receiptTypeColumnIndex = cursor.getColumnIndex(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_TYPE);
+//        int imageUriColumnIndex = cursor.getColumnIndex(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_IMAGE_URI);
 
         // Read the receipt attributes from the Cursor for the current receipt
         String receiptName = cursor.getString(nameColumnIndex);
         String receiptPrice = cursor.getString(priceColumnIndex);
         String receiptQuantity = cursor.getString(quantityColumnIndex);
-        String receiptType = cursor.getString(receiptTypeColumnIndex);
-        String receiptImageUri = cursor.getString(imageUriColumnIndex);
+//        String receiptType = cursor.getString(receiptTypeColumnIndex);
+//        String receiptImageUri = cursor.getString(imageUriColumnIndex);
 
         // Update the TextViews with the attributes for the current receipt
         nameTextView.setText(receiptName);
         priceTextView.setText(receiptPrice);
         quantityTextView.setText(receiptQuantity);
-        receiptTypeTextView.setText(receiptType);
-        imageUriTextView.setText(receiptImageUri);
+//        receiptTypeTextView.setText(receiptType);
+//        imageUriTextView.setText(receiptImageUri);
     }
 
 }
