@@ -29,6 +29,13 @@ public class CatalogActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        // Find the ListView which will be populated with the receipt data
+        ListView receiptListView = (ListView)findViewById(R.id.list);
+
+        // Find and set empty view on the listview so that it only shows when the list has 0 items
+        View emptyView = findViewById(R.id.empty_view);
+        receiptListView.setEmptyView(emptyView);
     }
 
     @Override

@@ -25,6 +25,9 @@
     <string name="hint_receipt_price">Approximate Amount Spent</string>
     <string name="hint_receipt_quantity">Expected Monthly Visits</string>
 
+    <!-- Title text for the empty view that prompts the user to add a receipt [CHAR LIMIT=50] -->
+    <string name="empty_view_title_text">Get started by adding a receipt.</string>
+
     <string name="add_a_receipt">Add a Receipt</string>
 
     <string name="hint_receipt_type"></string>
