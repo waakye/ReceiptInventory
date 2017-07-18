@@ -1,8 +1,12 @@
 package com.waakye.android.receiptinventory;
 
 import android.app.Activity;
+import android.app.LoaderManager;
 import android.content.ContentValues;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -35,9 +39,16 @@ import java.io.IOException;
  * Allows the user to create a new receipt or edit an existing one.
  */
 
-public class EditorActivity extends AppCompatActivity {
+public class EditorActivity extends AppCompatActivity
+        implements LoaderManager.LoaderCallbacks<Cursor>{
 
     public static final String LOG_TAG = EditorActivity.class.getSimpleName();
+
+    /** Identifier for the receipt data loader */
+    private static final int EXISTING_RECEIPT_LOADER = 0;
+
+    /** Content URI for the existing receipt (null if it's a new receipt) */
+    private Uri mCurrentReceiptUri;
 
     /** EditText field to enter the receipt's name */
     private EditText mNameEditText;
@@ -83,16 +94,20 @@ public class EditorActivity extends AppCompatActivity {
         // Examine the intent that was used to launch this activity, in order to figure out if
         // we're creating a new receipt or editing an existing one.
         Intent intent = getIntent();
-        Uri currentReceiptUri = intent.getData();
+        mCurrentReceiptUri = intent.getData();
 
         // If the intent DOES NOT contain a receipt content URI, then we know that we are creating
         // a new receipt
-        if(currentReceiptUri == null){
+        if (mCurrentReceiptUri == null){
             // This is a new receipt, so change the app bar to say "Add a Receipt"
             setTitle(getString(R.string.editor_activity_title_new_receipt));
         } else {
             // Otherwise, this an existing receipt, so change app bar to say "Edit Receipt"
             setTitle(getString(R.string.editor_activity_title_edit_receipt));
+
+            // Initialize a loader to read the receipt data from the database
+            // and display the current values in the editor.
+            getLoaderManager().initLoader(EXISTING_RECEIPT_LOADER, null, this);
         }
 
         // Find all the relevant views that we need to read user input from
@@ -306,4 +321,82 @@ public class EditorActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        // Since the editor shows all receipt attributes, define a projection that contains all
+        // columns from the receipts table
+        String[] projection = {
+                ReceiptContract.ReceiptEntry._ID,
+                ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_NAME,
+                ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_PRICE,
+                ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_QUANTITY,
+                ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_TYPE,
+                ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_IMAGE_URI};
+
+        // This loader will execute the ContentProvider's query method on a background thread
+        return new CursorLoader(this,       // Parent activity context
+                mCurrentReceiptUri,         // Query the content URI for the current receipt
+                projection,                 // Columns to include in the resulting Cursor
+                null,                       // No selection clause
+                null,                       // No selection arguments
+                null);                      // Default sort order
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        // End early if the cursor is null or there is less than 1 row in the cursor
+        if(cursor == null || cursor.getCount() < 1){
+            return;
+        }
+
+        // Proceed with moving to the first row of the cursor and reading data from it
+        // (This should be the only row in the cursor)
+        if(cursor.moveToFirst()) {
+            // Find the columns of the receipt attributes that we're interested in
+            int nameColumnIndex = cursor.getColumnIndex(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_NAME);
+            int priceColumnIndex = cursor.getColumnIndex(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_PRICE);
+            int quantityColumnIndex = cursor.getColumnIndex(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_QUANTITY);
+            int receiptTypeColumnIndex = cursor.getColumnIndex(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_TYPE);
+            int imageUriColumnIndex = cursor.getColumnIndex(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_IMAGE_URI);
+
+            // Extract out the value from the Cursor for the given column index
+            String name = cursor.getString(nameColumnIndex);
+            int price = cursor.getInt(priceColumnIndex);
+            int quantity = cursor.getInt(quantityColumnIndex);
+            int receiptType = cursor.getInt(receiptTypeColumnIndex);
+            String imageUri = cursor.getString(imageUriColumnIndex);
+
+            // Update the views on the screen with the values from the database
+            mNameEditText.setText(name);
+            mPriceEditText.setText(Integer.toString(price));
+            mQuantityEditText.setText(Integer.toString(quantity));
+
+            // Type is a dropdown spinner so map the constant value from the database into one of
+            // the dropdown options, then call setSelection() so that the option is displayed on
+            // screen as the current selection
+            switch(receiptType){
+                case ReceiptContract.ReceiptEntry.RECEIPT_LODGING:
+                    mReceiptTypeSpinner.setSelection(1);
+                    break;
+                case ReceiptContract.ReceiptEntry.RECEIPT_MEALS:
+                    mReceiptTypeSpinner.setSelection(2);
+                    break;
+                case ReceiptContract.ReceiptEntry.RECEIPT_TRANSPORTATION:
+                    mReceiptTypeSpinner.setSelection(3);
+                    break;
+                case ReceiptContract.ReceiptEntry.RECEIPT_ENTERTAINMENT:
+                    mReceiptTypeSpinner.setSelection(4);
+                    break;
+            }
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        // If the loader is invalidated, clear out the data from the input fields
+        mNameEditText.setText("");
+        mPriceEditText.setText("");
+        mQuantityEditText.setText("");
+        mReceiptTypeSpinner.setSelection(0); // Select "Unknown" Receipt Type
+    }
 }
