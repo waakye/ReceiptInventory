@@ -182,14 +182,34 @@ public class EditorActivity extends AppCompatActivity
         String nameString = mNameEditText.getText().toString().trim();
         String priceString = mPriceEditText.getText().toString().trim();
         String quantityString = mQuantityEditText.getText().toString().trim();
-        int price = Integer.parseInt(priceString);
-        int quantity = Integer.parseInt(quantityString);
+
+        // Check if this is supposed to be a new receipt and check if all the fields in the editor
+        // are blank
+        if(mCurrentReceiptUri == null &&
+                TextUtils.isEmpty(nameString) && TextUtils.isEmpty(priceString) &&
+                TextUtils.isEmpty(quantityString) &&
+                mReceiptType == ReceiptContract.ReceiptEntry.RECEIPT_UNKNOWN){
+            // Since no fields were modified, we can return early without creating a new receipt.
+            // No need to create ContentValues and no need to do any ContentProvider operations.
+            return;
+        }
 
         // Create a ContentValues object where column names are keys and receipt attributes from
         // the editor are the values.
         ContentValues values = new ContentValues();
         values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_NAME, nameString);
+        // If the price or quantity is not provided by the user, don't try to parse the string into
+        // an integer value.  Use 0 by default
+        int price = 0;
+        if(!TextUtils.isEmpty(priceString)){
+            price = Integer.parseInt(priceString);
+        }
         values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_PRICE, price);
+
+        int quantity = 0;
+        if(!TextUtils.isEmpty(quantityString)){
+            quantity = Integer.parseInt(quantityString);
+        }
         values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_QUANTITY, quantity);
         values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_TYPE, mReceiptType);
         values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_IMAGE_URI, "content://");
