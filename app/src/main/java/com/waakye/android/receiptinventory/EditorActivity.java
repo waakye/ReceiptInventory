@@ -176,13 +176,12 @@ public class EditorActivity extends AppCompatActivity
     /**
      * Get user input from editor and save new receipt into database.
      */
-    private void insertReceipt(){
+    private void saveReceipt(){
         // Read from input fields
         // Use trim to eliminate leading or trailing white space
         String nameString = mNameEditText.getText().toString().trim();
         String priceString = mPriceEditText.getText().toString().trim();
         String quantityString = mQuantityEditText.getText().toString().trim();
-
         int price = Integer.parseInt(priceString);
         int quantity = Integer.parseInt(quantityString);
 
@@ -195,18 +194,40 @@ public class EditorActivity extends AppCompatActivity
         values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_TYPE, mReceiptType);
         values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_IMAGE_URI, "content://");
 
-        // Insert a new receipt into the provider, returning the content URI for the new receipt
-        Uri newUri = getContentResolver().insert(ReceiptContract.ReceiptEntry.CONTENT_URI, values);
+        // Determine if this is a new or existing receipt by checking if mCurrentReceiptUri is null
+        // or not
+        if(mCurrentReceiptUri == null) {
+            // This is a NEW receipt, so insert a new receipt into the provider, returning the
+            // content URI for the new receipt
+            Uri newUri = getContentResolver().insert(ReceiptContract.ReceiptEntry.CONTENT_URI, values);
 
-        // Show a toast message depending on whether or not the insertion was successful
-        if (newUri == null){
-            // If the new content URI is null, then there was an error with insertion.
-            Toast.makeText(this, getString(R.string.editor_insert_receipt_failed),
-                    Toast.LENGTH_SHORT).show();
+            // Show a toast message depending on whether or not the insertion was successful.
+            if(newUri == null) {
+                // If the new content URI is null, then there was an error with insertion
+                Toast.makeText(this, getString(R.string.editor_insert_receipt_failed),
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                // Otherwise, the insertion was successful and we can display a toast
+                Toast.makeText(this, getString(R.string.editor_insert_receipt_successful),
+                        Toast.LENGTH_SHORT).show();
+            }
         } else {
-            // Otherwise, the insertion was successful and we can display a toast.
-            Toast.makeText(this, getString(R.string.editor_insert_receipt_successful),
-                    Toast.LENGTH_SHORT).show();
+            // Otherwise, this is an EXISTING receipt, so update the receipt with content URI:
+            // mCurrentReceiptUri and pass in the new ContentValues.  Pass in null for the
+            // selection and selection args because mCurrentReceiptUri will already identify the
+            // correct row in the database that we want to modify.
+            int rowsAffected = getContentResolver().update(mCurrentReceiptUri, values, null, null);
+
+            // Show a toast message depending on whether or not the update was successful.
+            if(rowsAffected == 0){
+                // If no rows were affected, then there was an error with the update.
+                Toast.makeText(this, getString(R.string.editor_update_receipt_failed),
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                // Otherwise, the update was successful and we can display a toast
+                Toast.makeText(this, getString(R.string.editor_update_receipt_successful),
+                        Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -225,7 +246,7 @@ public class EditorActivity extends AppCompatActivity
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
                 // Save receipt to database
-                insertReceipt();
+                saveReceipt();
                 // Exit activity
                 finish();
                 return true;

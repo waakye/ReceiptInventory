@@ -56,4 +56,10 @@
     <!-- Toast message in editor when new receipt has been successfully inserted [CHAR LIMIT=NONE] -->
     <string name="editor_insert_receipt_failed">Error with saving receipt</string>
 
+    <!-- Toast message in editor when current receipt was successfully updated [CHAR LIMIT=NONE] -->
+    <string name="editor_update_receipt_successful">Receipt updated</string>
+
+    <!-- Toast message in editor when current receipt has failed to be updated [CHAR LIMIT=NONE] -->
+    <string name="editor_update_receipt_failed">Error with updating receipt</string>
+
 </resources>
