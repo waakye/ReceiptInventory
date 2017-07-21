@@ -82,6 +82,12 @@ public class ReceiptCursorAdapter extends CursorAdapter {
 //        String receiptType = cursor.getString(receiptTypeColumnIndex);
 //        String receiptImageUri = cursor.getString(imageUriColumnIndex);
 
+        // If the receipt type is empty string or null, then use some default text that says
+        // "Unknown Type", so that TextView isn't blank
+//        if(TextUtils.isEmpty(receiptType)) {
+//            receiptType = context.getString(R.string.unknown_receipt_type);
+//        }
+
         // Update the TextViews with the attributes for the current receipt
         nameTextView.setText(receiptName);
         priceTextView.setText(receiptPrice);

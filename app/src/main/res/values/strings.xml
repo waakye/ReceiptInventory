@@ -42,6 +42,9 @@
     <string name="receipt_type_entertainment">Entertainment</string>
     <string name="receipt_type_unknown">Unknown</string>
 
+    <!-- Label for the receipt's type if the type is unknown [CHAR LIMIT=20] -->
+    <string name="unknown_receipt_type">Unknown Type</string>
+
     <string name="editor_activity_title_new_receipt">Add a Receipt</string>
 
     <string name="sale_button">Sale</string>
