@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.ContentValues;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
@@ -14,11 +15,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.support.v4.app.NavUtils;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -69,6 +72,21 @@ public class EditorActivity extends AppCompatActivity
      */
     private int mReceiptType = ReceiptContract.ReceiptEntry.RECEIPT_UNKNOWN;
 
+    /** Boolean flag that keeps track of whether the receipt has been edited (true) or not (false) */
+    private boolean mReceiptHasChanged = false;
+
+    /**
+     * OnTouchListener that listens for any user touches on a View, implying that they are modifying
+     * the view, and we change the mReceiptHasChanged boolean to true
+     */
+    private View.OnTouchListener mTouchListener = new View.OnTouchListener(){
+        @Override
+        public boolean onTouch(View view, MotionEvent motionEvent) {
+            mReceiptHasChanged = true;
+            return false;
+        }
+    };
+
     /** Variables and constants related to image picker */
     private static final int PICK_IMAGE_REQUEST = 0;
 //    private static final int SEND_MAIL_REQUEST = 1;
@@ -115,6 +133,14 @@ public class EditorActivity extends AppCompatActivity
         mPriceEditText = (EditText)findViewById(R.id.edit_receipt_price);
         mQuantityEditText = (EditText)findViewById(R.id.edit_receipt_quantity);
         mReceiptTypeSpinner = (Spinner)findViewById(R.id.spinner_receipt_type);
+
+        // Set up OnTouchListeners on all the input fields, so we can determine if the user has
+        // touched or modified them.  This will let us know if there are unsaved changes or not,
+        // if the user tries to leave the editor without saving.
+        mNameEditText.setOnTouchListener(mTouchListener);
+        mPriceEditText.setOnTouchListener(mTouchListener);
+        mQuantityEditText.setOnTouchListener(mTouchListener);
+        mReceiptTypeSpinner.setOnTouchListener(mTouchListener);
 
         setupSpinner();
 
@@ -275,11 +301,107 @@ public class EditorActivity extends AppCompatActivity
                 return true;
             // Respond to a click on the "Up" arrow button in the app bar
             case android.R.id.home:
-                // Navigate back to parent activity (CatalogActivity)
-                NavUtils.navigateUpFromSameTask(this);
+                // If the receipt hasn't changed, continue with navigating up to parent activity
+                // which is the {@link CatalogActivity}.
+                if(!mReceiptHasChanged){
+                    NavUtils.navigateUpFromSameTask(EditorActivity.this);
+                    return true;
+                }
+
+                // Otherwise, if there are unsaved changes, setup a dialog to warn the user.
+                // Create a click listener to handle the user confirming that changes should be
+                // discarded
+                DialogInterface.OnClickListener discardButtonClickListener =
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                // User clicked "Discard" button, navigate to parent activity
+                                NavUtils.navigateUpFromSameTask(EditorActivity.this);
+                            }
+                        };
+
+                // Show a dialog that notifies the user they have unsaved changes
+                showUnsavedChangesDialog(discardButtonClickListener);
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * This method is called when the back button is pressed
+     */
+    @Override
+    public void onBackPressed(){
+        // If the receipt hasn't changed, continue with handling back button press
+        if(!mReceiptHasChanged){
+            super.onBackPressed();
+            return;
+        }
+
+        // Otherwise, if there are unsaved changes, setup a dialog to warn the user.
+        // Create a click listener to handle the user confirming the changes should be discarded.
+        DialogInterface.OnClickListener discardButtonClickListener =
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // User clicked "Discard" button, close the current activity
+                        finish();
+                    }
+                };
+
+        // Show dialog that there are unsaved changes
+        showUnsavedChangesDialog(discardButtonClickListener);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        // Since the editor shows all receipt attributes, define a projection that contains all
+        // columns from the receipts table
+        String[] projection = {
+                ReceiptContract.ReceiptEntry._ID,
+                ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_NAME,
+                ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_PRICE,
+                ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_QUANTITY,
+                ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_TYPE,
+                ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_IMAGE_URI};
+
+        // This loader will execute the ContentProvider's query method on a background thread
+        return new CursorLoader(this,       // Parent activity context
+                mCurrentReceiptUri,         // Query the content URI for the current receipt
+                projection,                 // Columns to include in the resulting Cursor
+                null,                       // No selection clause
+                null,                       // No selection arguments
+                null);                      // Default sort order
+    }
+
+    /**
+     * Show a dialog that warns the user there are unsaved changes that will be lost if they
+     * continue leaving the editor.
+     *
+     * @param discardButtonClickListener  is the click listener for what to do when the user
+     *                                    confirms they want to discard their changes
+     */
+    private void showUnsavedChangesDialog(
+            DialogInterface.OnClickListener discardButtonClickListener) {
+        // Create an AlertDialog.Builder and set the message, and click listeners for the
+        // positive and negative buttons on the dialog.
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.unsaved_changes_dialog_msg);
+        builder.setPositiveButton(R.string.discard, discardButtonClickListener);
+        builder.setNegativeButton(R.string.keep_editing, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked the "Keep editing" button, so dismiss the dialog
+                // and continue editing the receipt
+                if(dialog != null){
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        // Create and show the AlertDialog
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
     }
 
 
@@ -362,26 +484,6 @@ public class EditorActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        // Since the editor shows all receipt attributes, define a projection that contains all
-        // columns from the receipts table
-        String[] projection = {
-                ReceiptContract.ReceiptEntry._ID,
-                ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_NAME,
-                ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_PRICE,
-                ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_QUANTITY,
-                ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_TYPE,
-                ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_IMAGE_URI};
-
-        // This loader will execute the ContentProvider's query method on a background thread
-        return new CursorLoader(this,       // Parent activity context
-                mCurrentReceiptUri,         // Query the content URI for the current receipt
-                projection,                 // Columns to include in the resulting Cursor
-                null,                       // No selection clause
-                null,                       // No selection arguments
-                null);                      // Default sort order
-    }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
