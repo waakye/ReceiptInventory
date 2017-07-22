@@ -99,6 +99,9 @@ public class EditorActivity extends AppCompatActivity
 
     private ImageView mImageView;
     private TextView mTextView;
+
+    // Buttons
+    private Button orderMoreButton;
     private Button imageButton;
 
     private Uri mUri;
@@ -123,6 +126,7 @@ public class EditorActivity extends AppCompatActivity
             // Invalidate the options menu, so the "Delete" menu option can be hidden
             // (It doesn't make sense to delete a receipt that hasn't been created yet.)
             invalidateOptionsMenu();
+            hideOrderButton();
         } else {
             // Otherwise, this an existing receipt, so change app bar to say "Edit Receipt"
             setTitle(getString(R.string.editor_activity_title_edit_receipt));
@@ -157,6 +161,39 @@ public class EditorActivity extends AppCompatActivity
             public void onClick(View view){
                 openImageSelector();
             }
+        });
+
+        orderMoreButton = (Button)findViewById(R.id.order_more_button);
+        orderMoreButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                // Get information for vendor, price, and quantity to enter into email
+                String nameInfo = mNameEditText.getText().toString().trim();
+                String priceInfo = mPriceEditText.getText().toString().trim();
+                String quantityInfo = mQuantityEditText.getText().toString().trim();
+
+                String emailSubject = getString(R.string.email_subject) + " " + nameInfo;
+
+                // Create email message
+                String emailMessage = getString(R.string.dear) + "\n\n"
+                        + getString(R.string.email_message_body) + "\n\n"
+                        + getString(R.string.amount_spent) + priceInfo + "\n\n"
+                        + getString(R.string.number_of_visits) + quantityInfo + "\n\n"
+                        + getString(R.string.email_conclusion) + "\n\n"
+                        + getString(R.string.sincerely) + "\n"
+                        + getString(R.string.user_name);
+
+                // Send intent
+                Intent intent = new Intent(Intent.ACTION_SENDTO);
+                intent.setData(Uri.parse("mailto:")); // For email apps only
+                intent.putExtra(Intent.EXTRA_SUBJECT, emailSubject);
+                intent.putExtra(Intent.EXTRA_TEXT, emailMessage);
+
+                if(intent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(intent);
+                }
+            }
+
         });
     }
 
@@ -561,5 +598,10 @@ public class EditorActivity extends AppCompatActivity
         mPriceEditText.setText("");
         mQuantityEditText.setText("");
         mReceiptTypeSpinner.setSelection(0); // Select "Unknown" Receipt Type
+    }
+
+    private void hideOrderButton(){
+        Button orderMoreButton = (Button)findViewById(R.id.order_more_button);
+        orderMoreButton.setVisibility(orderMoreButton.GONE);
     }
 }

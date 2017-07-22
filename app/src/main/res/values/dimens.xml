@@ -1,6 +1,7 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="activity_margin">16dp</dimen>
+    <dimen name="small_margin">4dp</dimen>
     <dimen name="activity_horizontal_margin">64dp</dimen>
     <dimen name="padding_left_indent">4dp</dimen>
 

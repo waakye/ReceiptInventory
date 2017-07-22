@@ -73,4 +73,17 @@
 
     <!-- Dialog button text for the option to keep editing the current receipt [CHAR LIMIT=20] -->
     <string name="keep_editing">Keep Editing</string>
+
+    <!-- Order More Button-related strings -->
+    <string name="order_more_button">Order More</string>
+    <string name="email_subject">Order Another Receipt from </string>
+    <string name="dear">Dear Sir or Madam:</string>
+    <string name="email_message_body">We lost the original receipt and would like to request another copy.
+        Please look up the order by the amount spent and the number of visits.</string>
+    <string name="amount_spent">Amount Spent: $</string>
+    <string name="number_of_visits">Number of Visits: </string>
+    <string name="email_conclusion">Thank you for your assistance.</string>
+    <string name="sincerely">Sincerely,</string>
+    <string name="user_name">Lester Lie</string>
+
 </resources>
