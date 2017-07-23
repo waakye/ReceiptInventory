@@ -103,6 +103,8 @@ public class EditorActivity extends AppCompatActivity
     // Buttons
     private Button orderMoreButton;
     private Button imageButton;
+    private Button addQuantityButton;
+    private Button subtractQuantityButton;
 
     private Uri mUri;
     private Bitmap mBitmap;
@@ -127,6 +129,9 @@ public class EditorActivity extends AppCompatActivity
             // (It doesn't make sense to delete a receipt that hasn't been created yet.)
             invalidateOptionsMenu();
             hideOrderButton();
+
+            // Set quantity default to zero
+            setDefaultQuantity();
         } else {
             // Otherwise, this an existing receipt, so change app bar to say "Edit Receipt"
             setTitle(getString(R.string.editor_activity_title_edit_receipt));
@@ -150,12 +155,44 @@ public class EditorActivity extends AppCompatActivity
         mQuantityEditText.setOnTouchListener(mTouchListener);
         mReceiptTypeSpinner.setOnTouchListener(mTouchListener);
 
+        // Identify buttons
+        imageButton = (Button)findViewById(R.id.add_image_button);
+        orderMoreButton = (Button)findViewById(R.id.order_more_button);
+        addQuantityButton = (Button)findViewById(R.id.add_quantity_button);
+        subtractQuantityButton = (Button)findViewById(R.id.subtract_quantity_button);
+
         setupSpinner();
 
         mTextView = (TextView) findViewById(R.id.image_uri);
         mImageView = (ImageView) findViewById(R.id.image);
 
-        imageButton = (Button)findViewById(R.id.add_image_button);
+        // Add quantity button
+        addQuantityButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                int quantity = Integer.parseInt(mQuantityEditText.getText().toString().trim());
+                quantity++;
+                mQuantityEditText.setText(Integer.toString(quantity));
+            }
+        });
+
+        // Subtract quantity button
+        subtractQuantityButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                int quantity = Integer.parseInt(mQuantityEditText.getText().toString().trim());
+                if (quantity == 0){
+                    Toast.makeText(getApplicationContext(),
+                            getString(R.string.quantity_cannot_be_negative),
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    quantity--;
+                    mQuantityEditText.setText(Integer.toString(quantity));
+                }
+            }
+        });
+
+        // Selects an image from gallery
         imageButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
@@ -163,7 +200,7 @@ public class EditorActivity extends AppCompatActivity
             }
         });
 
-        orderMoreButton = (Button)findViewById(R.id.order_more_button);
+        // Sends an intent to Email service to order another receipt
         orderMoreButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
@@ -600,8 +637,18 @@ public class EditorActivity extends AppCompatActivity
         mReceiptTypeSpinner.setSelection(0); // Select "Unknown" Receipt Type
     }
 
+    private void setDefaultQuantity(){
+        mQuantityEditText = (EditText)findViewById(R.id.edit_receipt_quantity);
+        String defaultQuantityText = "0";
+        mQuantityEditText.setText(defaultQuantityText);
+    }
+
+    /**
+     * Hide order button for new items
+     */
     private void hideOrderButton(){
         Button orderMoreButton = (Button)findViewById(R.id.order_more_button);
         orderMoreButton.setVisibility(orderMoreButton.GONE);
     }
+
 }

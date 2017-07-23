@@ -21,9 +21,9 @@
     <string name="category_receipt_type">Receipt Type</string>
     <string name="category_image">Image</string>
 
-    <string name="hint_receipt_name">Where Did You Spend Your Money?</string>
-    <string name="hint_receipt_price">Approximate Amount Spent</string>
-    <string name="hint_receipt_quantity">Expected Monthly Visits</string>
+    <string name="hint_receipt_name">Where Did You Spend?</string>
+    <string name="hint_receipt_price">Approx. Amount Spent</string>
+    <string name="hint_receipt_quantity">Visits</string>
 
     <!-- Title text for the empty view that prompts the user to add a receipt [CHAR LIMIT=50] -->
     <string name="empty_view_title_text">Get started by adding a receipt.</string>
@@ -85,5 +85,10 @@
     <string name="email_conclusion">Thank you for your assistance.</string>
     <string name="sincerely">Sincerely,</string>
     <string name="user_name">Lester Lie</string>
+
+    <string name="quantity_cannot_be_negative">Quantity cannot be negative</string>
+
+    <string name="editor_delete_receipt_failed">Error with deleting receipt</string>
+    <string name="editor_delete_receipt_successful">Receipt deleted</string>
 
 </resources>
