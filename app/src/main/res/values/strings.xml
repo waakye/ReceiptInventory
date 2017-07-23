@@ -71,6 +71,15 @@
     <!-- Dialog button text for the option to discard a user's changes [CHAR LIMIT=20] -->
     <string name="discard">Discard</string>
 
+    <!-- Dialog button text for the option to confirm deleting a receipt -->
+    <string name="delete">Delete</string>
+
+    <!-- Dialog message to ask the user to confirm deleting a single receipt [CHAR LIMIT=NONE] -->
+    <string name="delete_dialog_msg">Delete this receipt?</string>
+
+    <!-- Dialog button text for the option to cancel an action -->
+    <string name="cancel">Cancel</string>
+
     <!-- Dialog button text for the option to keep editing the current receipt [CHAR LIMIT=20] -->
     <string name="keep_editing">Keep Editing</string>
 

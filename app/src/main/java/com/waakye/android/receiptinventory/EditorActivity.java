@@ -391,7 +391,7 @@ public class EditorActivity extends AppCompatActivity
                 finish();
                 return true;
             case R.id.action_delete:
-                // Do nothing for now
+                showDeleteItemDialog();
                 return true;
             // Respond to a click on the "Up" arrow button in the app bar
             case android.R.id.home:
@@ -487,6 +487,36 @@ public class EditorActivity extends AppCompatActivity
             public void onClick(DialogInterface dialog, int id) {
                 // User clicked the "Keep editing" button, so dismiss the dialog
                 // and continue editing the receipt
+                if(dialog != null){
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        // Create and show the AlertDialog
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    /**
+     * Show a dialog that warns the user that receipt about to be deleted.
+     */
+    private void showDeleteItemDialog(){
+        // Create an AlertDialog.Builder and set the message, and click listeners for the positive
+        // and negative buttons on the dialog.
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.delete_dialog_msg);
+        builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener(){
+            public void onClick(DialogInterface dialog, int id){
+                // User clicked the "Delete" button, so delete the receipt
+                deleteReceipt();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked the "Cancel" button so dismiss the dialog and continue editing
+                // the receipt
                 if(dialog != null){
                     dialog.dismiss();
                 }
@@ -644,11 +674,35 @@ public class EditorActivity extends AppCompatActivity
     }
 
     /**
+     * Perform the deletion of the receipt in the database
+     */
+    private void deleteReceipt(){
+        // Only perform the delete for an existing receipt
+        if(mCurrentReceiptUri != null){
+            // Call the ContentResolver to delete the receipt at the given content URI
+            int rowsDeleted = getContentResolver().delete(mCurrentReceiptUri, null, null);
+
+            // Show a toast message depending on whether or not the delete was successful
+            if(rowsDeleted == 0){
+                // If no rows were deleted, then there was an error with the delete
+                Toast.makeText(this, getString(R.string.editor_delete_receipt_failed),
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                // Otherwise, the delete was successful and we display the toast
+                Toast.makeText(this,getString(R.string.editor_delete_receipt_successful),
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        // Close the activity
+        finish();
+    }
+
+    /**
      * Hide order button for new items
      */
     private void hideOrderButton(){
         Button orderMoreButton = (Button)findViewById(R.id.order_more_button);
         orderMoreButton.setVisibility(orderMoreButton.GONE);
     }
-
 }
