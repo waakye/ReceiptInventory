@@ -1,11 +1,15 @@
 package com.waakye.android.receiptinventory;
 
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
 
@@ -59,7 +63,7 @@ public class ReceiptCursorAdapter extends CursorAdapter {
      *                  projection from the CursorLoader in the CatalogActivity
      */
     @Override
-    public void bindView(View view, Context context, Cursor cursor) {
+    public void bindView(View view, final Context context, Cursor cursor) {
         Log.e(LOG_TAG, "bindView() method called...");
         // Find individual views that we want to modify in the list item layout
         TextView nameTextView = (TextView)view.findViewById(R.id.receipt_name);
@@ -69,6 +73,7 @@ public class ReceiptCursorAdapter extends CursorAdapter {
 //        TextView imageUriTextView = (TextView)view.findViewById(R.id.receipt_image_uri);
 
         // Find the columns of receipt attributes that we're interested in
+        int idColumnIndex = cursor.getColumnIndex(ReceiptContract.ReceiptEntry._ID);
         int nameColumnIndex = cursor.getColumnIndex(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_NAME);
         int priceColumnIndex = cursor.getColumnIndex(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_PRICE);
         int quantityColumnIndex = cursor.getColumnIndex(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_QUANTITY);
@@ -77,8 +82,8 @@ public class ReceiptCursorAdapter extends CursorAdapter {
 
         // Read the receipt attributes from the Cursor for the current receipt
         String receiptName = cursor.getString(nameColumnIndex);
-        String receiptPrice = cursor.getString(priceColumnIndex);
-        String receiptQuantity = cursor.getString(quantityColumnIndex);
+        int receiptPrice = cursor.getInt(priceColumnIndex);
+        final int receiptQuantity = cursor.getInt(quantityColumnIndex);
 //        String receiptType = cursor.getString(receiptTypeColumnIndex);
 //        String receiptImageUri = cursor.getString(imageUriColumnIndex);
 
@@ -88,12 +93,52 @@ public class ReceiptCursorAdapter extends CursorAdapter {
 //            receiptType = context.getString(R.string.unknown_receipt_type);
 //        }
 
+        // get row ID
+        final int rowId = cursor.getInt(idColumnIndex);
+
         // Update the TextViews with the attributes for the current receipt
         nameTextView.setText(receiptName);
         priceTextView.setText(receiptPrice);
         quantityTextView.setText(receiptQuantity);
 //        receiptTypeTextView.setText(receiptType);
 //        imageUriTextView.setText(receiptImageUri);
+
+        Button saleButton = (Button) view.findViewById(R.id.sale_button);
+        saleButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                Uri currentReceiptUri =
+                        ContentUris.withAppendedId(ReceiptContract.ReceiptEntry.CONTENT_URI, rowId);
+                reduceByOne(context, receiptQuantity, currentReceiptUri);
+            }
+        });
+    }
+
+    /**
+     * Reduce quantity of receipt by one
+     * @param context   activity context
+     * @param receiptUri  Uri to update receipt
+     * @param quantity    current receipt quantity
+     */
+    private void reduceByOne(Context context, int quantity, Uri receiptUri) {
+        if (quantity == 0) {
+            Log.v("ReceiptCursorAdapter", "quantity cannot be reduced");
+        } else {
+            int newQuantity = quantity - 1;
+            Log.v("ReceiptCursorAdapter", "new quantity is: " + newQuantity);
+
+            // Create content value
+            ContentValues values = new ContentValues();
+            values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_QUANTITY, newQuantity);
+            int rowsAffected = context.getContentResolver().update(receiptUri, values, null, null);
+
+            // Show a toast message depending on whether or not the update was successful
+            if(rowsAffected == 0){
+                Log.v("ReceiptCursorAdapter", "no rows changed");
+            } else {
+                Log.v("ReceiptCursorAdapter", "rows changed = " + rowsAffected);
+            }
+        }
     }
 
 }
