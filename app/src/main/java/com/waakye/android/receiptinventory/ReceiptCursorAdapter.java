@@ -98,8 +98,8 @@ public class ReceiptCursorAdapter extends CursorAdapter {
 
         // Update the TextViews with the attributes for the current receipt
         nameTextView.setText(receiptName);
-        priceTextView.setText(receiptPrice);
-        quantityTextView.setText(receiptQuantity);
+        priceTextView.setText(String.valueOf(receiptPrice));
+        quantityTextView.setText(String.valueOf(receiptQuantity));
 //        receiptTypeTextView.setText(receiptType);
 //        imageUriTextView.setText(receiptImageUri);
 
@@ -122,10 +122,10 @@ public class ReceiptCursorAdapter extends CursorAdapter {
      */
     private void reduceByOne(Context context, int quantity, Uri receiptUri) {
         if (quantity == 0) {
-            Log.v("ReceiptCursorAdapter", "quantity cannot be reduced");
+            Log.v("ReceiptCursorAdapter", "quantity cannot be reduced below zero,");
         } else {
             int newQuantity = quantity - 1;
-            Log.v("ReceiptCursorAdapter", "new quantity is: " + newQuantity);
+            Log.v("ReceiptCursorAdapter", "the New quantity is: " + newQuantity);
 
             // Create content value
             ContentValues values = new ContentValues();
