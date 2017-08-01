@@ -284,8 +284,9 @@ public class EditorActivity extends AppCompatActivity
     /**
      * Get user input from editor and save new receipt into database.
      */
-    private void saveReceipt(){
+    private boolean saveReceipt(){
         // Read from input fields
+        // Assign a String variable for each of the items in the EditTexts and TextView
         // Use trim to eliminate leading or trailing white space
         String nameString = mNameEditText.getText().toString().trim();
         String priceString = mPriceEditText.getText().toString().trim();
@@ -300,64 +301,75 @@ public class EditorActivity extends AppCompatActivity
                 mReceiptType == ReceiptContract.ReceiptEntry.RECEIPT_UNKNOWN){
             // Since no fields were modified, we can return early without creating a new receipt.
             // No need to create ContentValues and no need to do any ContentProvider operations.
-            return;
+            return true;
         }
 
-        // Create a ContentValues object where column names are keys and receipt attributes from
-        // the editor are the values.
-        ContentValues values = new ContentValues();
-        values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_NAME, nameString);
-        // If the price or quantity is not provided by the user, don't try to parse the string into
-        // an integer value.  Use 0 by default
-        int price = 0;
-        if(!TextUtils.isEmpty(priceString)){
-            price = Integer.parseInt(priceString);
-        }
-        values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_PRICE, price);
 
-        int quantity = 0;
-        if(!TextUtils.isEmpty(quantityString)){
-            quantity = Integer.parseInt(quantityString);
-        }
-        values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_QUANTITY, quantity);
-        values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_TYPE, mReceiptType);
-        values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_IMAGE_URI, imageUriString);
 
-        // Determine if this is a new or existing receipt by checking if mCurrentReceiptUri is null
-        // or not
-        if(mCurrentReceiptUri == null) {
-            // This is a NEW receipt, so insert a new receipt into the provider, returning the
-            // content URI for the new receipt
-            Uri newUri = getContentResolver().insert(ReceiptContract.ReceiptEntry.CONTENT_URI, values);
-
-            // Show a toast message depending on whether or not the insertion was successful.
-            if(newUri == null) {
-                // If the new content URI is null, then there was an error with insertion
-                Toast.makeText(this, getString(R.string.editor_insert_receipt_failed),
-                        Toast.LENGTH_SHORT).show();
-            } else {
-                // Otherwise, the insertion was successful and we can display a toast
-                Toast.makeText(this, getString(R.string.editor_insert_receipt_successful),
-                        Toast.LENGTH_SHORT).show();
-            }
+        // Check if Name is empty.  Quantity and price have default values, the rest of the info
+        // is not required
+        if(TextUtils.isEmpty(nameString)){
+            Toast.makeText(this, getString(R.string.editor_insert_receipt_failed_no_data),
+                    Toast.LENGTH_SHORT).show();
+            return false;
         } else {
-            // Otherwise, this is an EXISTING receipt, so update the receipt with content URI:
-            // mCurrentReceiptUri and pass in the new ContentValues.  Pass in null for the
-            // selection and selection args because mCurrentReceiptUri will already identify the
-            // correct row in the database that we want to modify.
-            int rowsAffected = getContentResolver().update(mCurrentReceiptUri, values, null, null);
+            // Create a ContentValues object where column names are keys and receipt attributes from
+            // the editor are the values.
+            ContentValues values = new ContentValues();
+            values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_NAME, nameString);
+            // If the price or quantity is not provided by the user, don't try to parse the string into
+            // an integer value.  Use 0 by default
+            int price = 0;
+            if(!TextUtils.isEmpty(priceString)){
+                price = Integer.parseInt(priceString);
+            }
+            values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_PRICE, price);
 
-            // Show a toast message depending on whether or not the update was successful.
-            if(rowsAffected == 0){
-                // If no rows were affected, then there was an error with the update.
-                Toast.makeText(this, getString(R.string.editor_update_receipt_failed),
-                        Toast.LENGTH_SHORT).show();
+            int quantity = 0;
+            if(!TextUtils.isEmpty(quantityString)){
+                quantity = Integer.parseInt(quantityString);
+            }
+            values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_QUANTITY, quantity);
+            values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_TYPE, mReceiptType);
+            values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_IMAGE_URI, imageUriString);
+
+            // Determine if this is a new or existing receipt by checking if mCurrentReceiptUri is null
+            // or not
+            if(mCurrentReceiptUri == null) {
+                // This is a NEW receipt, so insert a new receipt into the provider, returning the
+                // content URI for the new receipt
+                Uri newUri = getContentResolver().insert(ReceiptContract.ReceiptEntry.CONTENT_URI, values);
+
+                // Show a toast message depending on whether or not the insertion was successful.
+                if(newUri == null) {
+                    // If the new content URI is null, then there was an error with insertion
+                    Toast.makeText(this, getString(R.string.editor_insert_receipt_failed),
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    // Otherwise, the insertion was successful and we can display a toast
+                    Toast.makeText(this, getString(R.string.editor_insert_receipt_successful),
+                            Toast.LENGTH_SHORT).show();
+                }
             } else {
-                // Otherwise, the update was successful and we can display a toast
-                Toast.makeText(this, getString(R.string.editor_update_receipt_successful),
-                        Toast.LENGTH_SHORT).show();
+                // Otherwise, this is an EXISTING receipt, so update the receipt with content URI:
+                // mCurrentReceiptUri and pass in the new ContentValues.  Pass in null for the
+                // selection and selection args because mCurrentReceiptUri will already identify the
+                // correct row in the database that we want to modify.
+                int rowsAffected = getContentResolver().update(mCurrentReceiptUri, values, null, null);
+
+                // Show a toast message depending on whether or not the update was successful.
+                if(rowsAffected == 0){
+                    // If no rows were affected, then there was an error with the update.
+                    Toast.makeText(this, getString(R.string.editor_update_receipt_failed),
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    // Otherwise, the update was successful and we can display a toast
+                    Toast.makeText(this, getString(R.string.editor_update_receipt_successful),
+                            Toast.LENGTH_SHORT).show();
+                }
             }
         }
+        return true;
     }
 
     @Override
