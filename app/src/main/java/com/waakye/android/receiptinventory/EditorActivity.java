@@ -97,8 +97,11 @@ public class EditorActivity extends AppCompatActivity
 
     private static final String STATE_URI = "STATE_URI";
 
+    /** The Image displayed in the Image View */
     private ImageView mImageView;
-    private TextView mTextView;
+
+    /** TextView field containing the image uri of the image saved */
+    private TextView mImageUriTextView;
 
     // Buttons
     private Button orderMoreButton;
@@ -146,6 +149,7 @@ public class EditorActivity extends AppCompatActivity
         mPriceEditText = (EditText)findViewById(R.id.edit_receipt_price);
         mQuantityEditText = (EditText)findViewById(R.id.edit_receipt_quantity);
         mReceiptTypeSpinner = (Spinner)findViewById(R.id.spinner_receipt_type);
+        mImageUriTextView = (TextView)findViewById(R.id.image_uri);
 
         // Set up OnTouchListeners on all the input fields, so we can determine if the user has
         // touched or modified them.  This will let us know if there are unsaved changes or not,
@@ -163,7 +167,7 @@ public class EditorActivity extends AppCompatActivity
 
         setupSpinner();
 
-        mTextView = (TextView) findViewById(R.id.image_uri);
+        mImageUriTextView = (TextView) findViewById(R.id.image_uri);
         mImageView = (ImageView) findViewById(R.id.image);
 
         // Add quantity button
@@ -286,12 +290,13 @@ public class EditorActivity extends AppCompatActivity
         String nameString = mNameEditText.getText().toString().trim();
         String priceString = mPriceEditText.getText().toString().trim();
         String quantityString = mQuantityEditText.getText().toString().trim();
+        String imageUriString = mImageUriTextView.getText().toString().trim();
 
         // Check if this is supposed to be a new receipt and check if all the fields in the editor
         // are blank
         if(mCurrentReceiptUri == null &&
                 TextUtils.isEmpty(nameString) && TextUtils.isEmpty(priceString) &&
-                TextUtils.isEmpty(quantityString) &&
+                TextUtils.isEmpty(quantityString) && TextUtils.isEmpty(imageUriString) &&
                 mReceiptType == ReceiptContract.ReceiptEntry.RECEIPT_UNKNOWN){
             // Since no fields were modified, we can return early without creating a new receipt.
             // No need to create ContentValues and no need to do any ContentProvider operations.
@@ -316,7 +321,7 @@ public class EditorActivity extends AppCompatActivity
         }
         values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_QUANTITY, quantity);
         values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_TYPE, mReceiptType);
-        values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_IMAGE_URI, "content://");
+        values.put(ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_IMAGE_URI, imageUriString);
 
         // Determine if this is a new or existing receipt by checking if mCurrentReceiptUri is null
         // or not
@@ -566,7 +571,7 @@ public class EditorActivity extends AppCompatActivity
                 mUri = resultData.getData();
                 Log.i(LOG_TAG, "Uri: " + mUri.toString());
 
-                mTextView.setText(mUri.toString());
+                mImageUriTextView.setText(mUri.toString());
                 mBitmap = getBitmapFromUri(mUri);
                 mImageView.setImageBitmap(mBitmap);
 
@@ -575,7 +580,7 @@ public class EditorActivity extends AppCompatActivity
         } else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
             Log.i(LOG_TAG, "Uri: " + mUri.toString());
 
-            mTextView.setText(mUri.toString());
+            mImageUriTextView.setText(mUri.toString());
             mBitmap = getBitmapFromUri(mUri);
             mImageView.setImageBitmap(mBitmap);
 
@@ -637,6 +642,7 @@ public class EditorActivity extends AppCompatActivity
             mNameEditText.setText(name);
             mPriceEditText.setText(Integer.toString(price));
             mQuantityEditText.setText(Integer.toString(quantity));
+            mImageUriTextView.setText(imageUri);
 
             // Type is a dropdown spinner so map the constant value from the database into one of
             // the dropdown options, then call setSelection() so that the option is displayed on
@@ -665,6 +671,7 @@ public class EditorActivity extends AppCompatActivity
         mPriceEditText.setText("");
         mQuantityEditText.setText("");
         mReceiptTypeSpinner.setSelection(0); // Select "Unknown" Receipt Type
+        mImageUriTextView.setText("");
     }
 
     private void setDefaultQuantity(){
