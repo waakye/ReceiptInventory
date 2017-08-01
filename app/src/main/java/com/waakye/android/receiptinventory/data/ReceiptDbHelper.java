@@ -41,7 +41,8 @@ public class ReceiptDbHelper extends SQLiteOpenHelper {
                 + ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_PRICE + " INTEGER NOT NULL DEFAULT 0, "
                 + ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_QUANTITY + " INTEGER NOT NULL DEFAULT 0, "
                 + ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_TYPE + " INTEGER NOT NULL, "
-                + ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_IMAGE_URI + " TEXT);";
+                + ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_IMAGE_URI + " TEXT, "
+                + ReceiptContract.ReceiptEntry.COLUMN_RECEIPT_IMAGE + " BLOB);";
 
         // Execute the SQL statement
         db.execSQL(SQL_CREATE_RECEIPTS_TABLE);

@@ -106,6 +106,13 @@ public final class ReceiptContract {
         public final static String COLUMN_RECEIPT_IMAGE_URI = "image_uri";
 
         /**
+         * Image bitmap for the receipt's image
+         *
+         * Type: String
+         */
+        public final static String COLUMN_RECEIPT_IMAGE = "image";
+
+        /**
          * Possible values for the type of the receipt
          */
         public static final int RECEIPT_UNKNOWN = 0;
