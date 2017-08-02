@@ -304,8 +304,6 @@ public class EditorActivity extends AppCompatActivity
             return true;
         }
 
-
-
         // Check if Name is empty.  Quantity and price have default values, the rest of the info
         // is not required
         if(TextUtils.isEmpty(nameString)){
@@ -655,6 +653,10 @@ public class EditorActivity extends AppCompatActivity
             mPriceEditText.setText(Integer.toString(price));
             mQuantityEditText.setText(Integer.toString(quantity));
             mImageUriTextView.setText(imageUri);
+
+            // Convert imageUri which is a String into a Uri
+            Uri imageUriToBeShown = Uri.parse(imageUri);
+            mImageView.setImageBitmap(getBitmapFromUri(imageUriToBeShown));
 
             // Type is a dropdown spinner so map the constant value from the database into one of
             // the dropdown options, then call setSelection() so that the option is displayed on
